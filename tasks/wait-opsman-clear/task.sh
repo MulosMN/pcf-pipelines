@@ -21,43 +21,44 @@ set -eu
 
 POLL_INTERVAL=30
 function main() {
-
+  echo "1"
   local cwd
   cwd="${1}"
 
   set +e
   while :
   do
-
+      echo "2"
       om-linux --target "https://${OPSMAN_DOMAIN_OR_IP_ADDRESS}" \
            --skip-ssl-validation \
            --username "${OPSMAN_USERNAME}" \
            --password "${OPSMAN_PASSWORD}" \
             curl -path /api/v0/staged/pending_changes > changes-status.txt
-
+      echo "3"
       if [[ $? -ne 0 ]]; then
         echo "Could not login to ops man"
         cat changes-status.txt
         exit 1
       fi
-
+      echo "4"
       om-linux --target "https://${OPSMAN_DOMAIN_OR_IP_ADDRESS}" \
            --skip-ssl-validation \
            --username "${OPSMAN_USERNAME}" \
            --password "${OPSMAN_PASSWORD}" \
            curl -path /api/v0/installations > running-status.txt
-
+      echo "5"
       if [[ $? -ne 0 ]]; then
         echo "Could not login to ops man"
         cat running-status.txt
         exit 1
       fi
-
+      echo "6"
       grep "action" changes-status.txt
       ACTION_STATUS=$?
       jq -e -r '.installations[0] | select(.status=="running")' running-status.txt >/dev/null
       RUNNING_STATUS=$?
-
+      echo $ACTION_STATUS
+      echo $RUNNING_STATUS
       if [[ ${ACTION_STATUS} -ne 0 && ${RUNNING_STATUS} -ne 0 ]]; then
           echo "No pending changes or running installs detected. Proceeding"
           exit 0
